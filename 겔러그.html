@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #wrapper{
+            width:1000px;
+            height:800px;
+            margin: auto;
+            background-image: url(../images/Gallerxy/bg.png);    
+            position: relative;
+        }
+    </style>
+    <script src="./Hero.js"></script>
+    <script src="./Enemy.js"></script>
+    <script src="./Bullet.js"></script>
+    <script src="../lib/common.js"></script>
+    <script>
+        let wrapper;
+        let bgY=0; //배경의 y축 값을 누적시킬 전역변수 
+        let enemyImgArray=[
+            "../images/Gallerxy/green_king.png", //녹색 왕파리
+            "../images/Gallerxy/blue_king.png", //파란 왕파리
+            "../images/Gallerxy/enemy2.png", //파란 졸병 파리
+            "../images/Gallerxy/enemy1.png" //주황 졸병 파리
+        ];
+        let enemyArray=[]; //이차원 구조로 배치된 파리들을 담게될 이차원 배열
+        let hero; //다른 함수에서 접근할 수 있도록 전역변수로 선언
+        let bulletArray=[]; //여러 총알을 보관하기 위해 배열로 선언
+
+        function bgEffect(){
+            bgY++;
+            wrapper.style.backgroundPosition="0px  "+bgY+"px";
+        }
+
+        function createHero(){
+            hero = new Hero(wrapper, "../images/Gallerxy/ship.png",450, 700, 50,50,0,0);
+        }
+        
+        function createEnemy(){
+            //녹색왕, 파란왕, 파란졸병, 주황졸병 
+            for(let a=0;a<4;a++){
+                
+                let arr=[];//층수만큼 일차원배열이 필요함 
+
+                for(let i=0;i<20;i++){
+                    //container, src, x, y, width, height, velX, velY
+                    let enemy = new Enemy(wrapper, enemyImgArray[a] , 80 + i*(40+2), 50+(a*(40+2)), 40,40,0,0);
+                    arr.push(enemy);
+                }
+
+                enemyArray.push(arr);//이차원 배열에 추가
+            }
+        }
+
+        //총알을 발사한다 
+        function fire(){
+            let bullet = new Bullet(wrapper, "../images/Gallerxy/bullet.png", hero.x + (hero.width*(1/2)), hero.y, 7, 17, 0,-10);
+            
+            //생성된 총알을 배열에 담아놓자 
+            bulletArray.push(bullet);
+        }
+
+        function gameLoop(){
+            
+            bgEffect();//배경효과 내기..
+            hero.move();//주인공 움직이기
+
+            //생성된 모든 총알을 대상으로 move();
+            for(let i=0;i<bulletArray.length;i++){
+                bulletArray[i].move();
+            }
+        }
+
+        addEventListener("load", function(){
+            wrapper =document.getElementById("wrapper");
+
+            createHero();//주인공 생성
+            createEnemy();//적군 생성
+            
+            //키보드 이벤트 연결 
+            document.body.addEventListener("keydown", function(){
+                switch(event.keyCode){ 
+                    case 32: fire() ;break; //fire 
+                    case 37: hero.velX=-5  ;break; //left
+                    case 39: hero.velX=5   ;break; //right
+                }
+            });
+
+            document.body.addEventListener("keyup", function(){
+                switch(event.keyCode){ 
+                    case 37: hero.velX=0  ;break; //left
+                    case 39: hero.velX=0   ;break; //right
+                }
+            });
+            
+            setInterval("gameLoop()", 10);
+        });
+    </script>
+</head>
+<body>
+    <div id="wrapper"></div>
+</body>
+</html>
